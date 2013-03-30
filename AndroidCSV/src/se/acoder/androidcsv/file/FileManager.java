@@ -13,7 +13,6 @@ import android.util.Log;
  */
 public class FileManager {
 	private final static String TAG = FileManager.class.getSimpleName();
-	private FileIO fio;
 	private static FilePath manager_settings;
 	private static LinkedList<FilePath> managedFiles;
 	private static FileManager instance;
@@ -39,11 +38,10 @@ public class FileManager {
 	 */
 	private FileManager(Context c){
 		managedFiles = new LinkedList<FilePath>();
-		fio = new FileIO();
 		
 		manager_settings = new FilePath("barsys_filemanager", c);
 		if(FileIO.fileExists(manager_settings)){
-			List<Row> rawFilePaths = fio.readFile(manager_settings);
+			List<Row> rawFilePaths = FileIO.readFile(manager_settings);
 			Log.i(TAG, "Loads managed file-paths");
 			for(Row rawFilePath : rawFilePaths ){
 				managedFiles.add(new FilePath(rawFilePath.rebuild()[0], c));
@@ -55,7 +53,7 @@ public class FileManager {
 		managedFiles.remove(fp);
 		if(FileIO.fileExists(fp)){
 			Log.d(TAG,"Deletes file '"+fp.getName()+"'");
-			fio.deleteFile(fp);
+			FileIO.deleteFile(fp);
 			return true;
 		}
 		return false;
@@ -68,7 +66,7 @@ public class FileManager {
 	 * @return Success or fail.
 	 */
 	public synchronized boolean appendFile(FilePath fp, List<Row> rows){
-		if(fio.appendFile(fp, rows)){
+		if(FileIO.appendFile(fp, rows)){
 			if(!FileIsManaged(fp))
 				managedFiles.add(fp);
 			return true;
@@ -83,14 +81,14 @@ public class FileManager {
 	 */
 	public List<Row> readFile(FilePath fp){
 		if(FileIsManaged(fp) && FileIO.fileExists(fp)){
-			return fio.readFile(fp);
+			return FileIO.readFile(fp);
 		}
 		return null;
 	}
 	
 	public boolean copyToExt(FilePath fp){
 		if(FileIsManaged(fp) && FileIO.fileExists(fp))
-			return fio.saveExternal(fp);
+			return FileIO.saveExternal(fp);
 		return false;
 	}
 	

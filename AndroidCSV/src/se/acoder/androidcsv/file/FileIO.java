@@ -19,14 +19,15 @@ import android.os.Environment;
 import android.util.Log;
 
 /**
- * File manages actual interaction with device storage.
+ * The class manages actual interaction with device storage through
+ * static methods only exposed to the package.
  * @author Johannes Westlund
  *
  */
 public class FileIO {
 	private final static String TAG = FileIO.class.getSimpleName();
 	
-	protected List<Row> readFile(FilePath fp){
+	protected static List<Row> readFile(FilePath fp){
 		List<Row> rows = new ArrayList<Row>();
 		Log.i(TAG, "Attempts to read file");
 		try {
@@ -54,7 +55,7 @@ public class FileIO {
 		File f = path.getContext().getFileStreamPath(path.getName());
 		return f.isFile();
 	}
-	protected boolean appendFile(FilePath fp, List<Row> rows) {
+	protected static boolean appendFile(FilePath fp, List<Row> rows) {
 		try {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
 					fp.getContext().openFileOutput(fp.getName(), Context.MODE_APPEND)));
@@ -72,11 +73,12 @@ public class FileIO {
 		}
 		return false;
 	}
-	protected boolean deleteFile(FilePath fp){
+	protected static boolean deleteFile(FilePath fp){
 		File f = new File(fp.getURI());
 		return f.delete();
 	}
-	public boolean saveExternal(FilePath fp){
+	//TODO: Rewrite to generic
+	public static boolean saveExternal(FilePath fp){
 		String root = Environment.getExternalStorageDirectory().toString();
 		File loggerDir = new File(root + "/bikelogger"); 
 		loggerDir.mkdirs();
@@ -93,7 +95,7 @@ public class FileIO {
 		return false;
 	}
 	
-	private void copy(File src, File dst) throws IOException {
+	private static void copy(File src, File dst) throws IOException {
 	    InputStream in = new FileInputStream(src);
 	    OutputStream out = new FileOutputStream(dst);
 
