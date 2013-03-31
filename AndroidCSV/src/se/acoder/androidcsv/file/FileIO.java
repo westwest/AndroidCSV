@@ -11,9 +11,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
-
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
@@ -49,6 +49,48 @@ public class FileIO {
 		}
 		return null;
 	}
+	
+	protected static boolean removeRow(FilePath path, Row row){
+		Log.i(TAG, "Attempting removeRow");
+		if(fileExists(path)){
+			try {
+				File f = new File(path.getURI());
+				RandomAccessFile raf = new RandomAccessFile(f, "rw");
+				boolean found = false;
+				String csvRow = row.toString();
+				String line;
+				long lastPos = 0;
+				Log.i(TAG, "Tries to find row '"+csvRow+"'");
+				while(!found && (line = raf.readLine()) != null){
+					Log.d(TAG, "Current row: '"+line+"'");
+					if(line.equals(csvRow)){
+						Log.d(TAG, "Matching row was found");
+						found = true;
+						String restOfFile = "";
+						String tempStr;
+						while((tempStr = raf.readLine()) != null){
+							restOfFile+=tempStr;
+							restOfFile+="\n";
+						}
+						raf.seek(lastPos);
+						raf.setLength(lastPos);
+						raf.writeBytes(restOfFile);
+						raf.writeBytes("");
+						raf.close();
+						return true;
+					}
+					lastPos = raf.getFilePointer(); 
+				}
+				raf.close();
+			} catch (FileNotFoundException e) {
+				Log.d(TAG,"File not found.");
+			} catch (IOException e) {
+				Log.d(TAG, "IO Exception");
+			}
+		}
+		return false;
+	}
+	
 	public static synchronized boolean fileExists(FilePath path){
 		Log.d(TAG, "Test existance of '" + path.getURI() + "'");
 		//File f = new File(path.getURI());
@@ -77,10 +119,15 @@ public class FileIO {
 		File f = new File(fp.getURI());
 		return f.delete();
 	}
-	//TODO: Rewrite to generic
+	
+	/**
+	 * Exports given file to the public file-system to directory root/[packageName]
+	 * @param fp
+	 * @return
+	 */
 	public static boolean saveExternal(FilePath fp){
 		String root = Environment.getExternalStorageDirectory().toString();
-		File loggerDir = new File(root + "/bikelogger"); 
+		File loggerDir = new File(root + "/" + fp.getContext().getPackageName()); 
 		loggerDir.mkdirs();
 		File dst = new File(loggerDir, fp.getName());
 		File src = new File(fp.getURI());
@@ -89,7 +136,6 @@ public class FileIO {
 			Log.i(TAG, "Saved to '" + dst +"'");
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;

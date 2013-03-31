@@ -1,8 +1,10 @@
 package se.acoder.androidcsv.file;
 
 import android.content.Context;
+import android.util.Log;
 
 public class FilePath {
+	private final static String TAG = FilePath.class.getSimpleName();
 	private Context context;
 	private String fileName;
 	private String extention = ".txt";
@@ -30,5 +32,17 @@ public class FilePath {
 	}
 	public String getURI(){
 		return context.getFileStreamPath(getName()).getAbsolutePath();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof FilePath){
+			FilePath foreign = (FilePath) o;
+			Log.d(TAG, getName() + " == " + foreign.getName());
+			Log.d(TAG, "Outcome: " + (getName().equals(foreign.getName())));
+			if(getName().equals(foreign.getName()))
+				return true;
+		}
+		return false;
 	}
 }

@@ -56,4 +56,17 @@ public class FileTest extends AndroidTestCase {
 		assertTrue("Read rows should not be null", rowsFromFile != null);
 		assertEquals("Read rows should equals saved rows", generalTestData, rowsFromFile);
 	}
+	
+	public void testSingleRowOperations(){
+		Row row = new Row("test1;test2;");
+		assertTrue("Issue adding row", fm.appendFile(fp, row));
+		assertTrue("Issue removing row", fm.removeRow(fp, row));
+		assertTrue("Should be no content in file", fm.readFile(fp).isEmpty());
+	}
+	
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		fm.deleteFile(fp);
+	}
 }
